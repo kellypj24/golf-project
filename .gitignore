@@ -162,8 +162,8 @@ cython_debug/
 #.idea/
 
 # data
-/data
-.csv
+data/
+.csv 
 
 # MacOS
 .DS_Store
