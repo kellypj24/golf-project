@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "golf-project"
+version = "0.1.0"
+description = "python dependencies and venv for golf project"
+authors = ["PJ Kellym <kellypj24@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.28.0"
+jupyter = "^1.0.0"
+fastapi = "^0.111.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
