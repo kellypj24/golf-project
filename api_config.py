@@ -1,3 +1,5 @@
+import os
+
 from dataclasses import dataclass
 
 @dataclass
@@ -7,7 +9,7 @@ class APIEndpoint:
     parameters: dict[str, str]
 
 class APIConfig:
-    API_TOKEN: str = "your_api_token"
+    API_TOKEN: str = os.environ.get("DATAGOLF_API_TOKEN")
 
     MATCHUPS = APIEndpoint(
         name="matchups",
