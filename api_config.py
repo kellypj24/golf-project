@@ -37,7 +37,7 @@ class APIConfig:
         url="https://feeds.datagolf.com/betting-tools/outrights?tour={tour}&market={market}&odds_format={odds_format}&file_format={file_format}&key={API_TOKEN}",
         parameters={
             "tour": "pga",
-            "market": "outrights",
+            "market": "win",
             "odds_format": "decimal",
             "file_format": "csv",
         },
