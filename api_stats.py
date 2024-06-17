@@ -57,5 +57,11 @@ def main():
         all_pairings_rows = process_data(all_pairings_data)
         save_data(all_pairings_rows, APIConfig.MATCHUPS_ALL_PAIRINGS.parameters)
 
+    # Fetch data using the outrights endpoint
+    outrights_data = fetch_data(APIConfig.OUTRIGHTS)
+    if outrights_data:
+        outrights_rows = process_data(outrights_data)
+        save_data(outrights_rows, APIConfig.OUTRIGHTS.parameters)
+
 if __name__ == "__main__":
     main()
