@@ -3,9 +3,12 @@ import requests
 from io import StringIO
 import csv
 from api_config import APIConfig
+from itertools import product
 
-def fetch_data(endpoint):
-    url = endpoint.url.format(**endpoint.parameters, API_TOKEN=APIConfig.API_TOKEN)
+def fetch_data(endpoint, parameters=None):
+    if parameters is None:
+        parameters = {}
+    url = endpoint.url.format(**{**endpoint.parameters, **parameters}, API_TOKEN=APIConfig.API_TOKEN)
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -15,9 +18,16 @@ def fetch_data(endpoint):
         print(f"Request failed with status code: {response.status_code}")
         return None
 
-def process_data(data):
+def process_data(data, parameters=None):
     csv_data = csv.reader(StringIO(data))
     rows = list(csv_data)
+    
+    if parameters:
+        for param, value in parameters.items():
+            for row in rows[1:]:
+                row.append(value)
+            rows[0].append(param)
+    
     total_rows = len(rows)
     total_columns = len(rows[0]) if total_rows > 0 else 0
 
@@ -36,7 +46,7 @@ def save_data(rows, parameters):
     if not os.path.exists(data_directory):
         os.makedirs(data_directory)
 
-    file_name = f"{parameters['tour']}_{parameters.get('market', 'all_pairings')}_{parameters['odds_format']}.{parameters['file_format']}"
+    file_name = "_".join(f"{key}_{value}" for key, value in parameters.items()) + ".csv"
     file_path = os.path.join(data_directory, file_name)
     with open(file_path, "w", newline="") as file:
         writer = csv.writer(file)
@@ -44,24 +54,29 @@ def save_data(rows, parameters):
 
     print(f"Data saved to {file_path}")
 
-def main():
-    # Fetch data using the matchups endpoint
-    matchups_data = fetch_data(APIConfig.MATCHUPS)
-    if matchups_data:
-        matchups_rows = process_data(matchups_data)
-        save_data(matchups_rows, APIConfig.MATCHUPS.parameters)
-    
-    # Fetch data using the matchups all pairings endpoint
-    all_pairings_data = fetch_data(APIConfig.MATCHUPS_ALL_PAIRINGS)
-    if all_pairings_data:
-        all_pairings_rows = process_data(all_pairings_data)
-        save_data(all_pairings_rows, APIConfig.MATCHUPS_ALL_PAIRINGS.parameters)
+def get_parameter_combinations(endpoint):
+    parameter_combinations = []
+    list_parameters = {}
+    for param, value in endpoint.parameters.items():
+        if isinstance(value, list):
+            list_parameters[param] = value
+        else:
+            list_parameters[param] = [value]
 
-    # Fetch data using the outrights endpoint
-    outrights_data = fetch_data(APIConfig.OUTRIGHTS)
-    if outrights_data:
-        outrights_rows = process_data(outrights_data)
-        save_data(outrights_rows, APIConfig.OUTRIGHTS.parameters)
+    keys, values = zip(*list_parameters.items())
+    for combo in product(*values):
+        parameter_combinations.append(dict(zip(keys, combo)))
+
+    return parameter_combinations
+
+def main():
+    for endpoint in [APIConfig.MATCHUPS, APIConfig.MATCHUPS_ALL_PAIRINGS, APIConfig.OUTRIGHTS]:
+        parameter_combinations = get_parameter_combinations(endpoint)
+        for parameters in parameter_combinations:
+            data = fetch_data(endpoint, parameters)
+            if data:
+                rows = process_data(data, parameters)
+                save_data(rows, parameters)
 
 if __name__ == "__main__":
     main()
