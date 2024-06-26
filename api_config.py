@@ -2,11 +2,13 @@ import os
 
 from dataclasses import dataclass
 
+
 @dataclass
 class APIEndpoint:
     name: str
     url: str
     parameters: dict[str, str]
+
 
 class APIConfig:
     API_TOKEN: str = os.environ.get("DATAGOLF_API_TOKEN")
